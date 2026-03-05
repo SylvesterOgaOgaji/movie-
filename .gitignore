@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+dist/
+ios/
+android/
+capacitor.config.json
+package-lock.json
+*.log
