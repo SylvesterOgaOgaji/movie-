@@ -8,7 +8,7 @@
     <meta name="description"
         content="SCREEN is a premium cinematic movie browser. Explore trending films, series, and high-quality trailers with a stunning dark-theme experience.">
     <meta name="keywords" content="movies, series, browser, cinema, trailers, entertainment, cinematic app">
-    <meta name="referrer" content="no-referrer">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta property="og:title" content="SCREEN | Cinematic Movie Browser">
     <meta property="og:description"
         content="The ultimate cinematic experience for browsing your favorite movies and series.">
@@ -674,6 +674,116 @@
             color: var(--text-muted);
             line-height: 1.7;
             font-style: italic;
+        }
+
+        /* Interactive Discussion Styles */
+        .comment-input-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .comment-input-container:focus-within {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 20px rgba(232, 197, 71, 0.1);
+        }
+
+        #commentArea {
+            width: 100%;
+            min-height: 100px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+            outline: none;
+            margin-bottom: 1rem;
+        }
+
+        #commentArea[placeholder]:empty:before {
+            content: attr(placeholder);
+            color: var(--text-muted);
+        }
+
+        .comment-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .emoji-trigger {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .emoji-trigger:hover {
+            border-color: var(--accent-gold);
+            background: rgba(232, 197, 71, 0.1);
+        }
+
+        .emoji-picker {
+            position: absolute;
+            background: #1a1a1a;
+            border: 1px solid var(--accent-gold);
+            border-radius: 12px;
+            padding: 0.8rem;
+            display: none;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            width: 250px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .emoji-picker.active {
+            display: grid;
+        }
+
+        .emoji-item {
+            font-size: 1.5rem;
+            cursor: pointer;
+            text-align: center;
+            padding: 0.3rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .emoji-item:hover {
+            background: rgba(232, 197, 71, 0.2);
+            transform: scale(1.2);
+        }
+
+        .btn-post {
+            background: var(--accent-gold);
+            color: var(--bg-color);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-post:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
         }
 
         .loading-spinner {
@@ -1353,6 +1463,19 @@
                             <!-- Discussion Section -->
                             <div class="discussion-section">
                                 <h3 class="heading" style="font-size: 1.8rem; margin-bottom: 1.5rem;">Discussion</h3>
+                                
+                                <!-- User Input Area -->
+                                <div class="comment-input-container">
+                                    <div id="commentArea" contenteditable="true" placeholder="Share your thoughts with emojis..."></div>
+                                    <div class="comment-actions">
+                                        <button id="emojiBtn" class="emoji-trigger">
+                                            <span>😊</span> Emojis
+                                        </button>
+                                        <button id="postCommentBtn" class="btn-post">POST DISCUSSION</button>
+                                    </div>
+                                    <div id="emojiPicker" class="emoji-picker"></div>
+                                </div>
+
                                 <div id="reviewsContainer" class="reviews-list">
                                     <div class="loading-spinner">Loading Discussion...</div>
                                 </div>
@@ -1362,6 +1485,95 @@
                 `;
                 modal.classList.add('active');
                 document.body.style.overflow = 'hidden';
+
+                const commentArea = document.getElementById('commentArea');
+                const emojiBtn = document.getElementById('emojiBtn');
+                const emojiPicker = document.getElementById('emojiPicker');
+                const postBtn = document.getElementById('postCommentBtn');
+                const reviewsContainer = document.getElementById('reviewsContainer');
+
+                // Emoji list
+                const emojis = ['😊', '😂', '😍', '🔥', '🎬', '🍿', '😮', '🙌', '💯', '👏', '💖', '✨', '🎥', '⭐', '🌈', '🚀', '🥳', '😎', '😜', '👍', '👎', '💔', '😢', '😱'];
+                emojis.forEach(emoji => {
+                    const span = document.createElement('span');
+                    span.className = 'emoji-item';
+                    span.textContent = emoji;
+                    span.onclick = () => {
+                        commentArea.focus();
+                        document.execCommand('insertText', false, emoji);
+                        emojiPicker.classList.remove('active');
+                    };
+                    emojiPicker.appendChild(span);
+                });
+
+                emojiBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    emojiPicker.classList.toggle('active');
+                };
+
+                document.onclick = (e) => {
+                    if (!emojiPicker.contains(e.target) && e.target !== emojiBtn) {
+                        emojiPicker.classList.remove('active');
+                    }
+                };
+
+                // Local Persistence logic
+                const loadLocalComments = () => {
+                    const allLocalData = JSON.parse(localStorage.getItem('screen_comments') || '{}');
+                    return allLocalData[movie.imdbID] || [];
+                };
+
+                const saveLocalComment = (text) => {
+                    const allLocalData = JSON.parse(localStorage.getItem('screen_comments') || '{}');
+                    if (!allLocalData[movie.imdbID]) allLocalData[movie.imdbID] = [];
+                    allLocalData[movie.imdbID].unshift({
+                        author: 'YOU',
+                        content: text,
+                        date: new Date().toISOString(),
+                        local: true
+                    });
+                    localStorage.setItem('screen_comments', JSON.stringify(allLocalData));
+                };
+
+                const renderReviews = (tmdbReviews) => {
+                    const localComments = loadLocalComments();
+                    const combined = [...localComments, ...tmdbReviews];
+
+                    if (combined.length > 0) {
+                        reviewsContainer.innerHTML = combined.map(r => `
+                            <div class="review-card" ${r.local ? 'style="border-color: var(--accent-gold); background: rgba(232, 197, 71, 0.05);"' : ''}>
+                                <div class="review-author">
+                                    ${r.author} 
+                                    ${r.local ? '<span class="tag" style="font-size: 0.6rem; padding: 1px 4px;">YOUR POST</span>' : ''}
+                                    ${r.author_details?.rating ? `<span class="review-rating">★ ${r.author_details.rating}</span>` : ''}
+                                </div>
+                                <p class="review-text">${r.content}</p>
+                            </div>
+                        `).join('');
+                    } else {
+                        reviewsContainer.innerHTML = '<p style="color: var(--text-muted);">No discussions yet for this title. Be the first to post!</p>';
+                    }
+                };
+
+                postBtn.onclick = () => {
+                    const text = commentArea.innerText.trim();
+                    if (!text) return;
+                    saveLocalComment(text);
+                    commentArea.innerText = '';
+                    fetchAndRender(); // Refresh
+                };
+
+                const fetchAndRender = async () => {
+                    try {
+                        const mType = movie.Type === 'tv' ? 'tv' : 'movie';
+                        const reviewRes = await fetch(`/api/movies?type=reviews&id=${movie.imdbID}&media_type=${mType}`);
+                        const reviewData = await reviewRes.json();
+                        renderReviews(reviewData.results || []);
+                    } catch (e) {
+                        console.error(e);
+                        renderReviews([]);
+                    }
+                };
 
                 // Fetch Trailer
                 try {
@@ -1381,26 +1593,7 @@
                     }
                 } catch (e) { console.error(e); }
 
-                // Fetch Reviews
-                try {
-                    const mType = movie.Type === 'tv' ? 'tv' : 'movie';
-                    const reviewRes = await fetch(`/api/movies?type=reviews&id=${movie.imdbID}&media_type=${mType}`);
-                    const reviewData = await reviewRes.json();
-                    const container = document.getElementById('reviewsContainer');
-                    if (reviewData.results && reviewData.results.length > 0) {
-                        container.innerHTML = reviewData.results.slice(0, 5).map(r => `
-                            <div class="review-card">
-                                <div class="review-author">
-                                    ${r.author} 
-                                    ${r.author_details?.rating ? `<span class="review-rating">★ ${r.author_details.rating}</span>` : ''}
-                                </div>
-                                <p class="review-text">${r.content.length > 300 ? r.content.substring(0, 300) + '...' : r.content}</p>
-                            </div>
-                        `).join('');
-                    } else {
-                        container.innerHTML = '<p style="color: var(--text-muted);">No discussions yet for this title.</p>';
-                    }
-                } catch (e) { console.error(e); }
+                fetchAndRender();
             };
             window.openModalById = openModalById;
 
