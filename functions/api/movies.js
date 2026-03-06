@@ -16,6 +16,8 @@ export async function onRequest(context) {
   const page = url.searchParams.get("page") || "1";
   const genre = url.searchParams.get("genre") || "";
   const rating = url.searchParams.get("rating") || "0";
+  const movieId = url.searchParams.get("id") || "";
+  const mediaType = url.searchParams.get("media_type") || "movie"; // movie or tv
 
   let apiUrl = "";
   const baseUrl = "https://api.themoviedb.org/3";
@@ -27,9 +29,13 @@ export async function onRequest(context) {
   } else if (type === "series") {
     apiUrl = `${baseUrl}/tv/popular?api_key=${tmdbApiKey}&page=${page}`;
   } else if (type === "discover") {
-    apiUrl = `${baseUrl}/discover/movie?api_key=${tmdbApiKey}&with_genres=${genre}&vote_average.gte=${rating}&page=${page}`; // Modified discover URL to include rating
+    apiUrl = `${baseUrl}/discover/movie?api_key=${tmdbApiKey}&with_genres=${genre}&vote_average.gte=${rating}&page=${page}`;
   } else if (type === "genres") {
     apiUrl = `${baseUrl}/genre/movie/list?api_key=${tmdbApiKey}`;
+  } else if (type === "videos") {
+    apiUrl = `${baseUrl}/${mediaType}/${movieId}/videos?api_key=${tmdbApiKey}`;
+  } else if (type === "reviews") {
+    apiUrl = `${baseUrl}/${mediaType}/${movieId}/reviews?api_key=${tmdbApiKey}`;
   } else {
     apiUrl = `${baseUrl}/trending/all/day?api_key=${tmdbApiKey}&page=${page}`;
   }
