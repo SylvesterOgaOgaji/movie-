@@ -1108,7 +1108,7 @@
                 Title: m.title || m.name,
                 Year: (m.release_date || m.first_air_date || '').split('-')[0],
                 Poster: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : 'https://placehold.jp/24/0a0a0a/e8c547/300x450.png?text=' + encodeURIComponent(m.title || m.name),
-                Backdrop: m.backdrop_path ? `https://image.tmdb.org/t/p/original${m.backdrop_path}` : '',
+                Backdrop: m.backdrop_path ? `https://image.tmdb.org/t/p/original${m.backdrop_path}` : (m.poster_path ? `https://image.tmdb.org/t/p/original${m.poster_path}` : ''),
                 Plot: m.overview,
                 imdbRating: m.vote_average ? m.vote_average.toFixed(1) : 'N/A',
                 imdbVotes: m.vote_count ? m.vote_count.toLocaleString() : '0',
@@ -1118,6 +1118,16 @@
                 Trailer: '', // Requires separate fetch for videos
                 Images: m.backdrop_path ? [`https://image.tmdb.org/t/p/original${m.backdrop_path}`] : []
             });
+
+            // Intersection Observer for staggered entrance
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
 
             const fetchMovies = async (reset = false) => {
                 if (isLoading || (!hasMore && !reset)) return;
@@ -1205,9 +1215,10 @@
 
             const renderHero = (movie) => {
                 if (!movie) return;
+                const backdrop = movie.Backdrop || movie.Poster || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&q=80&w=1500';
                 hero.innerHTML = `
                     <div class="hero">
-                        <img src="${movie.Backdrop || movie.Poster}" class="hero-bg" alt="">
+                        <img src="${backdrop}" class="hero-bg" alt="">
                         <div class="hero-overlay"></div>
                         <div class="hero-content">
                             <div class="tag" style="margin-bottom: 1rem; display: inline-block;">Featured Title</div>
@@ -1222,6 +1233,12 @@
                         </div>
                     </div>
                 `;
+                // Add parallax effect to hero
+                const bg = hero.querySelector('.hero-bg');
+                window.addEventListener('scroll', () => {
+                    const scrolled = window.scrollY;
+                    bg.style.transform = `scale(1.1) translateY(${scrolled * 0.4}px)`;
+                });
             };
 
             const openModalById = async (id) => {
@@ -1282,6 +1299,7 @@
                         </div>
                     `;
                     grid.appendChild(card);
+                    revealObserver.observe(card);
                 });
             };
 
