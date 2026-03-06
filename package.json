@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "serve www",
-    "build": "echo 'Static assets already in www/'",
+    "build": "mkdir -p dist && cp -r www/* dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
