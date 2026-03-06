@@ -15,6 +15,7 @@ export async function onRequest(context) {
   const query = url.searchParams.get("query") || "";
   const page = url.searchParams.get("page") || "1";
   const genre = url.searchParams.get("genre") || "";
+  const rating = url.searchParams.get("rating") || "0";
 
   let apiUrl = "";
   const baseUrl = "https://api.themoviedb.org/3";
