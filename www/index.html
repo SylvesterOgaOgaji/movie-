@@ -1150,6 +1150,50 @@
             content: 'Advertisement';
         }
 
+        /* Ad Notice Toast */
+        #adNotice {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(26, 26, 26, 0.95);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid var(--accent-gold);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(232, 197, 71, 0.2);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            width: max-content;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        #adNotice.active {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .ad-notice-icon {
+            color: var(--accent-gold);
+            font-size: 1.2rem;
+        }
+
+        .ad-notice-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .ad-notice-subtext {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
         .review-form {
             background: rgba(255, 255, 255, 0.05);
             padding: 1.5rem;
@@ -1216,6 +1260,15 @@
             </button>
         </div>
     </header>
+
+    <!-- Ad Notice Toast -->
+    <div id="adNotice">
+        <span class="ad-notice-icon">📢</span>
+        <div>
+            <span class="ad-notice-text">Preparing your content...</span>
+            <span class="ad-notice-subtext">If an ad opens, simply return here to watch the trailer.</span>
+        </div>
+    </div>
 
     <!-- Ezoic Top Banner Ad Placeholder -->
     <!-- Adsterra Top Banner (468x60) -->
@@ -1705,6 +1758,27 @@
 
             modalClose.onclick = closeModal;
             modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+
+            // Ad Notice Logic
+            let adNoticeShown = false;
+            const adNotice = document.getElementById('adNotice');
+
+            const showAdNotice = () => {
+                if (adNoticeShown) return;
+                adNotice.classList.add('active');
+                adNoticeShown = true;
+                setTimeout(() => {
+                    adNotice.classList.remove('active');
+                }, 6000);
+            };
+
+            // Trigger notice on high-intent click
+            document.addEventListener('mousedown', (e) => {
+                const target = e.target.closest('.card, .filter-btn, .filter-pill, .hero-btn');
+                if (target) {
+                    showAdNotice();
+                }
+            }, { once: false }); // We allow it to show, but the function has a flag to only show once per session
 
             // Init
             fetchGenres();
