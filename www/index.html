@@ -1190,7 +1190,7 @@
                 Plot: m.overview,
                 imdbRating: m.vote_average ? m.vote_average.toFixed(1) : 'N/A',
                 imdbVotes: m.vote_count ? m.vote_count.toLocaleString() : '0',
-                Type: m.media_type || (m.first_air_date ? 'series' : 'movie'),
+                Type: (m.media_type === 'tv' || m.first_air_date) ? 'tv' : 'movie',
                 imdbID: m.id,
                 Genre: '', // Will be filled if we fetch genres
                 Trailer: '', // Requires separate fetch for videos
@@ -1365,7 +1365,8 @@
 
                 // Fetch Trailer
                 try {
-                    const videoRes = await fetch(`/api/movies?type=videos&id=${movie.imdbID}&media_type=${movie.Type === 'series' ? 'tv' : 'movie'}`);
+                    const mType = movie.Type === 'tv' ? 'tv' : 'movie';
+                    const videoRes = await fetch(`/api/movies?type=videos&id=${movie.imdbID}&media_type=${mType}`);
                     const videoData = await videoRes.json();
                     const trailer = videoData.results?.find(v => v.type === 'Trailer' && v.site === 'YouTube');
                     const container = document.getElementById('trailerContainer');
@@ -1382,7 +1383,8 @@
 
                 // Fetch Reviews
                 try {
-                    const reviewRes = await fetch(`/api/movies?type=reviews&id=${movie.imdbID}&media_type=${movie.Type === 'series' ? 'tv' : 'movie'}`);
+                    const mType = movie.Type === 'tv' ? 'tv' : 'movie';
+                    const reviewRes = await fetch(`/api/movies?type=reviews&id=${movie.imdbID}&media_type=${mType}`);
                     const reviewData = await reviewRes.json();
                     const container = document.getElementById('reviewsContainer');
                     if (reviewData.results && reviewData.results.length > 0) {
